@@ -1,7 +1,10 @@
 <html>
     <form action="" method="post">
         Nome: <br>
-        <input type="text" name ="usuario" value=""> <br>
+        <?php
+            $loginUsuario = (isset($_COOKIE['loginUsuario']) ? $_COOKIE['loginUsuario'] : "");
+        ?>
+        <input type="text" name ="usuario" value="<?php echo $loginUsuario;?>"> <br>
         Senha: <br>
         <input type="password" name="senha" value=""> <br>
         <input type="submit" value="Enviar">
@@ -11,11 +14,21 @@
         session_start();
         
         if($_POST){
+            include "util.php";
             $usuario = $_POST['usuario'];
             $senha = $_POST['senha'];
+            $conn = conectar();
+            $select = $conn->prepare("Select nome from usuario where usuario =:email and senha =:senha");
+            $select->bindParam(":usuario",$usuario);
+            $select->bindParam(":senha",$senha);
+
+            $select->execute();
+
+            $linha = $select->fetch();
             
-            if(($usuario == "irineu") and ($senha = 123)){
+            if($linha['nome']!=""){
                 echo "Conectado";
+                setcookie("loginUsuario", $usuario, time()+86400);
                 echo "Usuario eh: $usuario <br> Senha eh: $senha";
             
                 $_SESSION['conectado'] = true;
